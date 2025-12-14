@@ -187,9 +187,20 @@ def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-@app.put("/user")
-def update_user(user: User):
-    return {"id": user.id, "name": user.name}
+@app.delete("/users/{id}")
+def delete_user(id: str, db: Session = Depends(get_db)):
+    """Deleta um usuário"""
+    user = db.query(UserDB).filter(UserDB.id == id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    db.delete(user)
+    db.commit()
+
+    print(f"[DB] Usuário deletado: {id}")
+
+    return {"mensagem": f"Usuário {id} deletado"}
 
 
 if __name__ == "__main__":
